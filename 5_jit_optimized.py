@@ -28,31 +28,48 @@ with open(data_file) as f:
 for rules in maps:
     rules.sort(key=lambda x: x[1])
 
-actual_num_rules = []
+actual_num_rules = [len(rules) for rules in maps]
 for index in range(len(maps)):
-    actual_num_rules.append(len(maps[index]))
-    if len(maps[index]) < 45:
-        maps[index] += [[0, 0, 0]] * (45 - len(maps[index]))
+    maps[index] += [[0, 0, 0]] * (45 - len(maps[index]))
 
-
-# Lowest location: 137516820. Took 74.21 seconds
 start_time = time.time()
+
+# 41.48 seconds
 @jit(nopython=True, parallel=True, fastmath=True, nogil=True)
 def get_lowest(actual_num_rules, seed_ranges, maps):
     minimizer = 2147483647
     for seed_range_index in prange(len(seed_ranges)):
-        start, end = seed_ranges[seed_range_index]
-        for state in prange(start, end):
-            for map_index, rules in enumerate(maps):
+        for state in prange(seed_ranges[seed_range_index][0], seed_ranges[seed_range_index][1]):
+            for map_index in range(len(maps)):
                 for rule_index in range(actual_num_rules[map_index]):
-                    dest, source, length = rules[rule_index]
-                    if source > state:
+                    relevant = maps[map_index][rule_index]
+                    if relevant[1] > state:
                         break
-                    if state < source + length:
-                        state += dest - source
+                    if state < relevant[1] + relevant[2]:
+                        state += relevant[0] - relevant[1]
                         break
             minimizer = min(minimizer, state)
     return minimizer
 
 ans = get_lowest(np.array(actual_num_rules), np.array(seed_ranges), np.array(maps))
 print_green(f'Lowest location: {ans}. Took {time.time() - start_time:.2f} seconds')
+
+
+# more readable
+# 66.21 seconds
+# @jit(nopython=True, parallel=True, fastmath=True, nogil=True)
+# def get_lowest(actual_num_rules, seed_ranges, maps):
+#     minimizer = 2147483647
+#     for seed_range_index in prange(len(seed_ranges)):
+#         start, end = seed_ranges[seed_range_index]
+#         for state in prange(start, end):
+#             for map_index, rules in enumerate(maps):
+#                 for rule_index in range(actual_num_rules[map_index]):
+#                     dest, source, length = rules[rule_index]
+#                     if source > state:
+#                         break
+#                     if state < source + length:
+#                         state += dest - source
+#                         break
+#             minimizer = min(minimizer, state)
+#     return minimizer
