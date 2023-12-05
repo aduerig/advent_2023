@@ -43,7 +43,6 @@ def range_difference(r1, r2):
 
 
 def apply_rules(rules, ranges):
-    ranges.sort()
     new_ranges = []
     used_ranges = []
     for r1 in ranges:
