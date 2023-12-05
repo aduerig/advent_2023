@@ -1,6 +1,6 @@
 # https://adventofcode.com/2023
 import pathlib
-import sys
+import time
 
 from helpers import * 
 
@@ -41,6 +41,8 @@ print(f'Total seeds to process: {total_to_process:,}')
 import numpy as np
 from numba import jit
 
+start_time = time.time()
+
 @jit(nopython=True)
 def traverse_maps(maps, state):
     for map in maps:
@@ -53,15 +55,15 @@ def traverse_maps(maps, state):
                 break
     return state
 
-
 @jit(nopython=True)
 def get_lowest(seed_ranges, maps):
-    lowest = sys.maxint # numba doesn't know about float('inf') 
+    lowest = 2147483647 # numba doesn't know about float('inf') 
     for start, end_inclusive in seed_ranges:
         for state in range(start, end_inclusive + 1):
             lowest = min(lowest, traverse_maps(maps, state))
     return lowest
 print_green(f'Lowest location: {get_lowest(np.array(seed_ranges), np.array(maps))}')
+print(f'Took {time.time() - start_time:.2f} seconds')
 
 
 # part 2 slow (works but is too slow)
