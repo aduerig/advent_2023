@@ -65,15 +65,10 @@ def apply_rules(rules, ranges):
 
 
 start_time = time.time()
-smallest = float('inf')
 ranges = [[start, end] for start, end in seed_ranges]
 for rules in maps:
-    # print(f'Rules for map:')
-    # for (s, e), offset in rules:
-    #     print(f'    {s}-{e} -> {s + offset}-{e + offset}')
     ranges = apply_rules(rules, ranges)
-smallest = min(smallest, min(ranges)[0])
-print_green(f'{smallest} - took {time.time() - start_time:.5f} seconds')
+print_green(f'{min(ranges)[0]} - took {time.time() - start_time:.5f} seconds')
 
 
 
