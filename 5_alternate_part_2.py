@@ -28,18 +28,20 @@ def range_intersection(r1, r2):
         return [start, end]
 
 
-def range_difference(r1, r2):
+def range_difference(r1, r2):    
     intersection = range_intersection(r1, r2)
-    if intersection is None:
-        return [r1]
     if intersection == r1:
         return []
-    start, end = intersection
-    if start == r1[0]:
-        return [[end + 1, r1[1]]]
-    elif end == r1[1]:
-        return [[r1[0], start - 1]]
-    return [[r1[0], start - 1], [end + 1, r1[1]]]
+    if intersection is None:
+        return [r1]
+    start, end = r1
+
+    intersection_start, intersection_end = intersection
+    if intersection_start == start:
+        return [[intersection_end + 1, end]]
+    elif intersection_end == end:
+        return [[start, intersection_start - 1]]
+    return [[start, intersection_start - 1], [intersection_end + 1, end]]
 
 
 def apply_rules(rules, ranges):
