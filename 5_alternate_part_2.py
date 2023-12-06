@@ -1,26 +1,25 @@
 # https://adventofcode.com/2023
 import pathlib
+import time
 
 from helpers import * 
 
-filepath = pathlib.Path(__file__)
-data_file = filepath.parent.joinpath('5.dat')
-
+data_file = pathlib.Path(__file__).parent.joinpath('5.dat')
 
 seed_ranges = []
 maps = []
 with open(data_file) as f:
     seeds = f.readline().split(':')[-1].strip().split()
-    for seed_index in range(0, len(seeds), 2):
-        start, length = int(seeds[seed_index]), int(seeds[seed_index + 1])
+    for index in range(0, len(seeds), 2):
+        start, length = int(seeds[index]), int(seeds[index + 1])
         seed_ranges.append((start, (start + length) - 1))
     for line in f.readlines():
-        line = line.strip()
         if line.count('-') == 2:
             maps.append([])
-        elif line:
+        elif line.strip():
             dest, source, length = list(map(int, line.split()))
             maps[-1].append([[source, (source + length) - 1], dest - source])
+
 
 def range_intersection(r1, r2):
     start, end = max(r1[0], r2[0]), min(r1[1], r2[1])
@@ -28,51 +27,47 @@ def range_intersection(r1, r2):
         return [start, end]
 
 
-def range_difference(r1, r2):    
+def range_difference(r1, r2):
     intersection = range_intersection(r1, r2)
-    if intersection == r1:
-        return []
     if intersection is None:
         return [r1]
-    start, end = r1
 
-    intersection_start, intersection_end = intersection
-    if intersection_start == start:
-        return [[intersection_end + 1, end]]
-    elif intersection_end == end:
-        return [[start, intersection_start - 1]]
-    return [[start, intersection_start - 1], [intersection_end + 1, end]]
+    r1_start, r1_end = r1
+    int_start, int_end = intersection
+    remaining = []
+    if int_start != r1_start:
+        remaining.append([r1_start, int_start - 1])
+    if int_end != r1_end:
+        remaining.append([int_end + 1, r1_end])
+    return remaining
 
 
 def apply_rules(rules, ranges):
-    new_ranges = []
-    used_ranges = []
+    ranges_in_mapping = []
     for r1 in ranges:
         for r2, offset in rules:
             intersection = range_intersection(r1, r2)
             if intersection is not None:
-                used_ranges.append(intersection)
-                new_ranges.append([x + offset for x in intersection])
+                ranges_in_mapping.append([intersection, offset])
 
-    unfitting_ranges = ranges
-    for subtract_range in used_ranges:
+    ranges_outside_mapping = ranges
+    for (subtract_range, _) in ranges_in_mapping:
         building = []
-        for range in unfitting_ranges:
+        for range in ranges_outside_mapping:
             for difference in range_difference(range, subtract_range):
                 building.append(difference)
-        unfitting_ranges = building
-    return new_ranges + unfitting_ranges
+        ranges_outside_mapping = building
+    return ranges_outside_mapping + [[start + offset, end + offset] for (start, end), offset in ranges_in_mapping]
 
 
 start_time = time.time()
-ranges = [[start, end] for start, end in seed_ranges]
 for rules in maps:
-    ranges = apply_rules(rules, ranges)
-print_green(f'{min(ranges)[0]} - took {time.time() - start_time:.5f} seconds')
+    seed_ranges = apply_rules(rules, seed_ranges)
+print_green(f'{min(seed_ranges)[0]} - took {time.time() - start_time:.5f} seconds')
 
 
 
-# weird search attempt, i think trash
+# weird search attempt, i think this is trash
 # # https://adventofcode.com/2023
 # import pathlib
 
