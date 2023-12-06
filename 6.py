@@ -15,22 +15,22 @@ with open(data_file) as f:
 
 start_time = time.time()
 
-def win(dist, total_time, hold_time):
-    return bool(hold_time * (total_time - hold_time) > dist)
+def win(hold_time):
+    return hold_time * (total_time - hold_time) > dist
 
-def binary_search(dist, total_time, want_to_win):
+
+def binary_search(want_to_win):
     left, right = 0, total_time - 1
     while left <= right:
         mid = (left + right) // 2
-        if not (win(dist, total_time, mid) ^ want_to_win):
+        if not (win(mid) ^ want_to_win):
             right = mid - 1
         else:
             left = mid + 1
     return left
 
-first_win = binary_search(dist, total_time, True)
-last_win = binary_search(dist, total_time, False)
-print(last_win - first_win)
+print(binary_search(False) - binary_search(True))
+
 
 # initial part 2 solve, takes 5.9 seconds
 # ways = 0
